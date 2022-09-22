@@ -4,7 +4,7 @@ import os
 import argparse
 from migen import *
 
-from litex_boards.platforms import hsrm_progenitor
+from litex_boards.platforms import alinx_ax7101
 
 from litex.soc.cores.clock import *
 from litex.soc.integration.soc import SoCRegion
