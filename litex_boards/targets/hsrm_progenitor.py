@@ -16,7 +16,6 @@ from litedram.phy import s7ddrphy
 from litex.soc.cores.led import LedChaser
 
 from liteeth.phy import LiteEthPHYGMII
-from liteeth.phy.rmii import LiteEthPHYRMII
 
 class _CRG(Module):
     def __init__(self, platform, sys_clk_freq):
@@ -49,11 +48,7 @@ class BaseSoC(SoCCore):
                          **kwargs)
 
         # CRG -------------------------------------------------------------
-        #eth0_clock = platform.request("eth_clocks", 0)
-        #eth1_clock = platform.request("eth1_clocks_ext", 0)
-        #eth2_clock = platform.request("eth2_clocks_ext", 0)
-        #eth3_clock = platform.request("eth3_clocks_ext", 0)
-        #eth4_clock = platform.request("eth4_clocks_ext", 0)
+        eth0_clock = platform.request("eth_clocks_ext", 0)
 
         self.submodules.crg = _CRG(platform, sys_clk_freq) 
 
@@ -70,57 +65,12 @@ class BaseSoC(SoCCore):
             )
         
         # Ethernet -------------------------------------------------------
-        # WARNING: Use LiteEthPHYRMII as Phy for the module itself (100MBit!)
-        #self.submodules.ethphy = LiteEthPHYGMII(
-        #        clock_pads = eth0_clock,
-        #        pads       = self.platform.request("eth", 0)
-        #        )
-        #self.add_csr("ethphy")
-        #self.add_ethernet(name="ethmac", phy=self.ethphy, phy_cd="ethphy_eth")
-
-        from liteeth.phy import LiteEthPHYGMIIMII
-        self.submodules.ethphy = LiteEthPHYGMIIMII(
-            clock_pads = self.platform.request("eth_clocks", eth_phy),
-            pads       = self.platform.request("eth", eth_phy),
-            clk_freq   = int(self.sys_clk_freq))
-        self.add_ethernet(phy=self.ethphy)
-        self.ethphy.crg.cd_eth_rx.clk.attr.add("keep")
-        self.ethphy.crg.cd_eth_tx.clk.attr.add("keep")
-        self.platform.add_platform_command("""
-        NET "{eth_clocks_rx}" CLOCK_DEDICATED_ROUTE = FALSE;
-        NET "{eth_clocks_tx}" CLOCK_DEDICATED_ROUTE = FALSE;
-        """,
-        eth_clocks_rx=platform.lookup_request("eth_clocks").rx,
-        eth_clocks_tx=platform.lookup_request("eth_clocks").tx,
-        )
-
-#        self.submodules.ethphy1 = LiteEthPHYGMII(
-#                clock_pads = eth1_clock,
-#                pads       = self.platform.request("eth", 1)
-#                )
-#        self.add_csr("ethphy1")
-#        self.add_ethernet(name="ethmac1", phy=self.ethphy1, phy_cd="ethphy1_eth")
-#        
-#        self.submodules.ethphy2 = LiteEthPHYGMII(
-#                clock_pads = eth2_clock,
-#                pads       = self.platform.request("eth", 2)
-#                )
-#        self.add_csr("ethphy2")
-#        self.add_ethernet(name="ethmac2", phy=self.ethphy2, phy_cd="ethphy2_eth")
-
-        #self.submodules.ethphy3 = LiteEthPHYGMII(
-        #        clock_pads = eth3_clock,
-        #        pads       = self.platform.request("eth", 3)
-        #        )
-        #self.add_csr("ethphy3")
-        #self.add_ethernet(name="ethmac3", phy=self.ethphy3, phy_cd="ethphy3_eth")
-        #self.submodules.ethphy4 = LiteEthPHYRMII(
-        #        clock_pads = eth4_clock,
-        #        pads       = self.platform.request("eth", 4)
-        #        )
-        #self.add_csr("ethphy4")
-        #self.add_ethernet(name="ethmac4", phy=self.ethphy4, phy_cd="ethphy4_eth")
-
+        self.submodules.ethphy = LiteEthPHYGMII(
+                clock_pads = eth0_clock,
+                pads       = self.platform.request("eth", 0)
+                )
+        self.add_csr("ethphy")
+        self.add_ethernet(name="ethmac", phy=self.ethphy, phy_cd="eth")
 
         # Leds -------------------------------------------------------------------------------------
         #self.submodules.leds = LedChaser(
