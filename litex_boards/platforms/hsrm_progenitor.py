@@ -47,19 +47,102 @@ _io = [
 
     # UART
     ("serial", 0,
-        Subsignal("tx", Pins("B20")),
-        Subsignal("rx", Pins("A20")),
+        Subsignal("tx", Pins("U18")),
+        Subsignal("rx", Pins("P16")),
         IOStandard("LVCMOS33"),
     ),
 
-    # GMII Ethernet
-    ("eth_clocks_ext", 0,
-        Subsignal("tx", Pins("H18")),
-        Subsignal("gtx", Pins("N20")),
-        Subsignal("rx", Pins("K18")),
+    # GMII Ethernet 0
+    ("eth0_clocks_ext", 0,
+        Subsignal("tx", Pins("D19")),
+        Subsignal("gtx", Pins("C13")),
+        Subsignal("rx", Pins("E19")),
+        Misc("SLEW=FAST"),
+        Drive(16),
         IOStandard("LVCMOS33")
     ),
     ("eth", 0,
+        Subsignal("rst_n",   Pins("Y22")),
+        #Subsignal("int_n",   Pins("MISSING")),#TODO Ask about that pin to be added
+        Subsignal("mdc",     Pins("AA10")),
+        Subsignal("mdio",    Pins("AA11")),
+        Subsignal("rx_dv",   Pins("E22")),
+        Subsignal("rx_er",   Pins("T21")),
+        Subsignal("rx_data", Pins("D22 G22 G21 E21 F18 E18 U17 Y21")),
+        Subsignal("tx_en",   Pins("B13")),
+        Subsignal("tx_er",   Pins("D21")),
+        Subsignal("tx_data", Pins("C17 D17 C14 C15 C19 C18 A21 B21")),
+        Subsignal("col",  Pins("R17")),
+        Subsignal("crs",  Pins("U21")),
+        Misc("SLEW=FAST"),
+        Drive(16),
+        IOStandard("LVCMOS33")
+    ),
+
+    # GMII Ethernet 1
+    ("eth1_clocks_ext", 0,
+        Subsignal("tx", Pins("D15")),
+        Subsignal("gtx", Pins("A13")),
+        Subsignal("rx", Pins("B17")),
+        Misc("SLEW=FAST"),
+        Drive(16),
+        IOStandard("LVCMOS33")
+    ),
+    ("eth", 1,
+        Subsignal("rst_n",   Pins("A19")),
+        #Subsignal("int_n",   Pins("MISSING")),#TODO Ask about that pin to be added
+        Subsignal("mdc",     Pins("B22")),
+        Subsignal("mdio",    Pins("C22")),
+        Subsignal("rx_dv",   Pins("A14")),
+        Subsignal("rx_er",   Pins("B20")),
+        Subsignal("rx_data", Pins("B18 B15 B16 A15 A16 F19 F20 A18")),
+        Subsignal("tx_en",   Pins("A20")),
+        Subsignal("tx_er",   Pins("F13")),
+        Subsignal("tx_data", Pins("D16 E16 E17 F16 D14 E14 E13 F14")),
+        Subsignal("col",  Pins("C20")),
+        Subsignal("crs",  Pins("D20")),
+        Misc("SLEW=FAST"),
+        Drive(16),
+        IOStandard("LVCMOS33")
+    ),
+
+    # GMII Ethernet 2
+    ("eth2_clocks_ext", 0,
+        Subsignal("tx", Pins("M18")),
+        Subsignal("gtx", Pins("G18")),
+        Subsignal("rx", Pins("J20")),
+        Misc("SLEW=FAST"),
+        Drive(16),
+        IOStandard("LVCMOS33")
+    ),
+    ("eth", 2,
+        Subsignal("rst_n",   Pins("G16")),
+        #Subsignal("int_n",   Pins("MISSING")),#TODO Ask about that pin to be added
+        Subsignal("mdc",     Pins("V19")),
+        Subsignal("mdio",    Pins("V18")),
+        Subsignal("rx_dv",   Pins("Y18")),
+        Subsignal("rx_er",   Pins("AB20")),
+        Subsignal("rx_data", Pins("Y19 V17 W17 AA19 L16 K16 K13 K14")),
+        Subsignal("tx_en",   Pins("G17")),
+        Subsignal("tx_er",   Pins("J21")),
+        Subsignal("tx_data", Pins("G15 G13 H13 L18 N18 N19 H14 J14")),
+        Subsignal("col",  Pins("J15")),
+        Subsignal("crs",  Pins("H15")),
+        Misc("SLEW=FAST"),
+        Drive(16),
+        IOStandard("LVCMOS33")
+    ),
+
+    # GMII Ethernet 3
+    ("eth3_clocks_ext", 0,
+        Subsignal("tx", Pins("H18")),
+        Subsignal("gtx", Pins("N20")),
+        Subsignal("rx", Pins("K18")),
+        Misc("SLEW=FAST"),
+        Drive(16),
+        IOStandard("LVCMOS33")
+    ),
+    ("eth", 3,
         Subsignal("rst_n",   Pins("G20")),
         #Subsignal("int_n",   Pins("MISSING")),#TODO Ask about that pin to be added
         Subsignal("mdc",     Pins("L15")),
@@ -72,7 +155,20 @@ _io = [
         Subsignal("tx_data", Pins("M13 L13 N22 M22 H17 K17 J17 M16")),
         Subsignal("col",  Pins("K22")),
         Subsignal("crs",  Pins("M21")),
+        Misc("SLEW=FAST"),
+        Drive(16),
         IOStandard("LVCMOS33")
+    ),
+
+    # PCIe
+    ("pcie_x1", 0,
+        Subsignal("rst_n", Pins("W19"), IOStandard("LVCMOS33"), Misc("PULLUP=TRUE")),
+        Subsignal("clk_p", Pins("E10")),
+        Subsignal("clk_n", Pins("F10")),
+        Subsignal("rx_p",  Pins("C9")),
+        Subsignal("rx_n",  Pins("D9")),
+        Subsignal("tx_p",  Pins("D7")),
+        Subsignal("tx_n",  Pins("C7"))
     ),
 
     # SDCard
