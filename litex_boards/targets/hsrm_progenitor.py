@@ -44,7 +44,7 @@ class _CRG(Module):
 
 
 class BaseSoC(SoCCore):
-    def __init__(self, sys_clk_freq=int(100e6), **kwargs):
+    def __init__(self, sys_clk_freq=int(50e6), **kwargs):
         platform = hsrm_progenitor.Platform()
 
         # SoCCore ---------------------------------------------------------
@@ -141,7 +141,9 @@ class BaseSoC(SoCCore):
         #self.submodules.leds = LedChaser(
         #    pads         = platform.request_all("user_led"),
         #    sys_clk_freq = sys_clk_freq)
-            
+
+        self.add_sdcard()
+        
 
 def main():
     parser = argparse.ArgumentParser(description="LiteX SoC on HSRM Progenitor")
