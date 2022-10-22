@@ -16,7 +16,12 @@ from litedram.phy import s7ddrphy
 from litex.soc.cores.led import LedChaser
 
 from liteeth.phy import LiteEthPHYGMII
-from liteeth.phy.rmii import LiteEthPHYRMII
+
+from litex.build.generic_platform import Subsignal, Pins
+from litesata.phy import LiteSATAPHY
+
+from litepcie.phy.s7pciephy import S7PCIEPHY
+from litepcie.software import generate_litepcie_software
 
 class _CRG(Module):
     def __init__(self, platform, sys_clk_freq):
@@ -49,11 +54,10 @@ class BaseSoC(SoCCore):
                          **kwargs)
 
         # CRG -------------------------------------------------------------
-        eth0_clock = platform.request("eth_clocks_ext", 0)
+        eth0_clock = platform.request("eth0_clocks_ext", 0)
         eth1_clock = platform.request("eth1_clocks_ext", 0)
         eth2_clock = platform.request("eth2_clocks_ext", 0)
-        #eth3_clock = platform.request("eth3_clocks_ext", 0)
-        #eth4_clock = platform.request("eth4_clocks_ext", 0)
+        eth3_clock = platform.request("eth3_clocks_ext", 0)
 
         self.submodules.crg = _CRG(platform, sys_clk_freq) 
 
@@ -70,7 +74,6 @@ class BaseSoC(SoCCore):
             )
         
         # Ethernet -------------------------------------------------------
-        # WARNING: Use LiteEthPHYRMII as Phy for the module itself (100MBit!)
         self.submodules.ethphy = LiteEthPHYGMII(
                 clock_pads = eth0_clock,
                 pads       = self.platform.request("eth", 0)
@@ -92,19 +95,47 @@ class BaseSoC(SoCCore):
         self.add_csr("ethphy2")
         self.add_ethernet(name="ethmac2", phy=self.ethphy2, phy_cd="ethphy2_eth")
 
-        #self.submodules.ethphy3 = LiteEthPHYGMII(
-        #        clock_pads = eth3_clock,
-        #        pads       = self.platform.request("eth", 3)
-        #        )
-        #self.add_csr("ethphy3")
-        #self.add_ethernet(name="ethmac3", phy=self.ethphy3, phy_cd="ethphy3_eth")
-        #self.submodules.ethphy4 = LiteEthPHYRMII(
-        #        clock_pads = eth4_clock,
-        #        pads       = self.platform.request("eth", 4)
-        #        )
-        #self.add_csr("ethphy4")
-        #self.add_ethernet(name="ethmac4", phy=self.ethphy4, phy_cd="ethphy4_eth")
+        self.submodules.ethphy3 = LiteEthPHYGMII(
+                clock_pads = eth3_clock,
+                pads       = self.platform.request("eth", 3)
+                )
+        self.add_csr("ethphy3")
+        self.add_ethernet(name="ethmac3", phy=self.ethphy3, phy_cd="ethphy3_eth")
 
+        # SATA -----------------------------------------------------------
+        _sata_io = [
+             # PCIe 2 SATA Custom Adapter (With PCIe Riser / SATA cable mod).
+            ("pcie2sata", 0,
+                Subsignal("tx_p",  Pins("B6")),
+                Subsignal("tx_n",  Pins("A6")),
+                Subsignal("rx_p",  Pins("B10")),
+                Subsignal("rx_n",  Pins("A10")),
+            ),
+        ]
+        platform.add_extension(_sata_io)
+
+        # RefClk, Generate 150MHz from PLL.
+        self.clock_domains.cd_sata_refclk = ClockDomain()
+        self.crg.pll.create_clkout(self.cd_sata_refclk, 150e6)
+        sata_refclk = ClockSignal("sata_refclk")
+        platform.add_platform_command("set_property SEVERITY {{Warning}} [get_drc_checks REQP-49]")
+
+        # PHY
+        self.submodules.sata_phy = LiteSATAPHY(platform.device,
+            refclk     = sata_refclk,
+            pads       = platform.request("pcie2sata"),
+            gen        = "gen1",
+            clk_freq   = sys_clk_freq,
+            data_width = 16)
+
+        # Core
+        self.add_sata(phy=self.sata_phy, mode="read+write")
+
+        # PCIE -----------------------------------------------------------
+        #self.submodules.pcie_phy = S7PCIEPHY(platform, platform.request("pcie_x1"),
+        #    data_width = 64,
+        #    bar0_size  = 0x20000)
+        #self.add_pcie(phy=self.pcie_phy, ndmas=1)
 
         # Leds -------------------------------------------------------------------------------------
         #self.submodules.leds = LedChaser(

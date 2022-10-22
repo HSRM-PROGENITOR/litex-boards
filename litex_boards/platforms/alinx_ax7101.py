@@ -165,7 +165,9 @@ class Platform(XilinxPlatform):
         XilinxPlatform.__init__(self, "xc7a100t-fgg484-2", _io, _connectors, toolchain="vivado")
         self.add_platform_command("set_property INTERNAL_VREF 0.750 [get_iobanks 34]")
         self.add_platform_command("set_property INTERNAL_VREF 0.750 [get_iobanks 35]")
-
+        self.add_platform_command("set_property BITSTREAM.CONFIG.CONFIGRATE 50 [current_design]")
+        self.add_platform_command("set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4 [current_design]")
+        self.add_platform_command("set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]")
 
     def create_programmer(self):
         return OpenOCD("openocd_ax7101.cfg", "bscan_spi_xc7a100t.bit")
