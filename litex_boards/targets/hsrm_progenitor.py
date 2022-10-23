@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+# Copyright (c) 2021-2022 Brendan Christy <brendan.christy@hs-rm.de>
+#                         David.Brandt <david.brandt@hs-rm.de>
+#                         Steffen Reith <steffen.reith@hs-rm.de>
+# SPDX-License-Identifier: BSD-2-Clause
+
 import os
 import argparse
 from migen import *
@@ -34,14 +39,13 @@ class _CRG(Module):
         self.submodules.pll = pll = S7MMCM(speedgrade=-2)
         self.comb += pll.reset.eq(~platform.request("cpu_reset") | self.rst)
         pll.register_clkin(platform.request("clk50"), 50e6)
-        pll.create_clkout(self.cd_sys,    sys_clk_freq)
-        pll.create_clkout(self.cd_sys4x,  4*sys_clk_freq)
+        pll.create_clkout(self.cd_sys, sys_clk_freq)
+        pll.create_clkout(self.cd_sys4x, 4*sys_clk_freq)
         pll.create_clkout(self.cd_sys4x_dqs, 4*sys_clk_freq, phase=90)
         pll.create_clkout(self.cd_idelay, 200e6)
         platform.add_false_path_constraints(self.cd_sys.clk, pll.clkin)
 
         self.submodules.idelayctrl = S7IDELAYCTRL(self.cd_idelay)
-
 
 class BaseSoC(SoCCore):
     def __init__(self, sys_clk_freq=int(50e6), **kwargs):
@@ -70,8 +74,7 @@ class BaseSoC(SoCCore):
             self.add_sdram("sdram",
                 phy           = self.ddrphy,
                 module        = IS43TR16256B(sys_clk_freq, "1:4"),
-                l2_cache_size = kwargs.get("l2_size", 8192)
-            )
+                l2_cache_size = kwargs.get("l2_size", 8192))
         
         # Ethernet -------------------------------------------------------
         self.submodules.ethphy = LiteEthPHYGMII(
@@ -139,17 +142,17 @@ class BaseSoC(SoCCore):
 
         # Leds -------------------------------------------------------------------------------------
         #self.submodules.leds = LedChaser(
-        #    pads         = platform.request_all("user_led"),
-        #    sys_clk_freq = sys_clk_freq)
+        #    pads             = platform.request_all("user_led"),
+        #    sys_clk_freq     = sys_clk_freq)
 
+        # SDCard -----------------------------------------------------------------------------------
         self.add_sdcard()
         
-
 def main():
     parser = argparse.ArgumentParser(description="LiteX SoC on HSRM Progenitor")
     parser.add_argument("--build", action="store_true", help="Build Bitstream")
     parser.add_argument("--load", action="store_true", help="Load Bitstream")
-    parser.add_argument("--sys-clk-freq", default=100e6, help="System clock frequency (default: 100MHz)")
+    parser.add_argument("--sys-clk-freq", default=50e6, help="System clock frequency (default: 50MHz)")
     
     sdopts = parser.add_mutually_exclusive_group()
     sdopts.add_argument("--with-sdcard", action="store_true", help="Enable SDCard support")
