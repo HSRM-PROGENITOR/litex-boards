@@ -154,9 +154,6 @@ def main():
     parser.add_argument("--load", action="store_true", help="Load Bitstream")
     parser.add_argument("--sys-clk-freq", default=50e6, help="System clock frequency (default: 50MHz)")
     
-    sdopts = parser.add_mutually_exclusive_group()
-    sdopts.add_argument("--with-sdcard", action="store_true", help="Enable SDCard support")
-    
     builder_args(parser)
     soc_core_args(parser)
     args = parser.parse_args()
